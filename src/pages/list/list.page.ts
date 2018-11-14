@@ -20,7 +20,11 @@ export class ListPage implements OnInit {
     'build'
   ];
   public items: Array<{ title: string; note: string; icon: string }> = [];
+
   constructor() {
+  }
+
+  ngOnInit() {
     for (let i = 1; i < 11; i++) {
       this.items.push({
         title: 'Item ' + i,
@@ -29,11 +33,4 @@ export class ListPage implements OnInit {
       });
     }
   }
-
-  ngOnInit() {
-  }
-  // add back when alpha.4 is out
-  // navigate(item) {
-  //   this.router.navigate(['/list', JSON.stringify(item)]);
-  // }
 }

@@ -1,0 +1,22 @@
+<ion-tabs #tabs>
+  <ion-tab-bar slot="bottom" color="primary">
+
+    <ion-tab-button tab="map" href="/tabs/(map:map)">
+      <ion-label>Map</ion-label>
+      <ion-icon name="map"></ion-icon>
+    </ion-tab-button>
+
+    <ion-tab-button tab="list" href="/tabs/(list:list)">
+      <ion-label>Home</ion-label>
+      <ion-icon name="home"></ion-icon>
+    </ion-tab-button>
+
+  </ion-tab-bar>
+
+  <ion-tab tab="map">
+    <ion-router-outlet name="map"></ion-router-outlet>
+  </ion-tab>
+  <ion-tab tab="list">
+    <ion-router-outlet name="list"></ion-router-outlet>
+  </ion-tab>
+</ion-tabs>

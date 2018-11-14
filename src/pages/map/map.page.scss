@@ -1,0 +1,17 @@
+.my-item, #map_canvas {
+  margin: 2px
+}
+
+#content-container{
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.my-item {
+  height: 7% !important;
+}
+
+#map_canvas {
+  flex-grow: 1 !important;
+}

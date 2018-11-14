@@ -1,5 +1,7 @@
 {
   "name": "my-bordeaux",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
