@@ -1,0 +1,22 @@
+.kkkk {
+  background-color: red;
+  margin: 5px;
+}
+
+#content-container{
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.blue_border {
+  flex-grow: 1 !important;
+}
+
+.fill-height {
+  flex-grow: 1 !important;
+}
+
+.my-item {
+  height: 7% !important;
+}

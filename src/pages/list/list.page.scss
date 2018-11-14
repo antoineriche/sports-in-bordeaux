@@ -1,1 +1,31 @@
+.my-item, #map_canvas {
+  margin: 2px
+}
 
+#content-container{
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.my-item {
+  height: 7% !important;
+}
+
+.full_height {
+  flex-grow: 1 !important;
+}
+
+.height-fix {
+  height: 250px;
+}
+
+.blue_border {
+  margin: 5px;
+  border: 5px solid blue;
+}
+
+#map_canvas_2 {
+  flex-grow: 1 !important;
+  border: 5px solid red;
+}

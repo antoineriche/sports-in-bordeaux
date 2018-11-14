@@ -4,19 +4,73 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      Sport points 
+      Sport points
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-spinner *ngIf="load" name="bubbles"></ion-spinner>
+      <ion-button ion-button icon-only (click)="this.showFilters = !this.showFilters" *ngIf="!load">
+        <ion-icon name="funnel"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let item of items">
-      <ion-icon [name]="item.icon" slot="start"></ion-icon>
-      {{item.title}}
-      <div class="item-note" slot="end">
-        {{item.note}}
+
+  <ion-segment [(ngModel)]="currentSegment" (ionChange)="segmentChanged($event)">
+    <ion-segment-button value="map">
+      <ion-icon name="map"></ion-icon>
+    </ion-segment-button>
+    <ion-segment-button value="list">
+      <ion-icon name="list"></ion-icon>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div id="content-container">
+
+    <div *ngIf="showFilters">
+      <ion-item class="my-item">
+        <ion-label>Types</ion-label>
+        <ion-select [(ngModel)]="currentTypeFilter" placeholder="Tous" (ionChange)="onTypeChange($event)">
+          <ion-select-option *ngFor="let type of sportPointsTypes" [value]="type">
+            {{type}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="my-item">
+        <ion-label position="fixed">{{sportPointUtils.friendlyDistance(currentDistanceFilter)}}</ion-label>
+        <ion-range [(ngModel)]="currentDistanceFilter" color="primary" pin="false" [(ngModel)]="distanceFilter"
+          min="0" [max]="maxDistance" (ionChange)="onDistanceChange($event)">
+        </ion-range>
+      </ion-item>
+    </div>
+
+    <!-- <div id="map_canvas_2"> -->
+      <div [hidden] = "currentSegment != 'map'" id="map_canvas_2" #map_canvas class="blue_border">
+        <!-- <div #map_canvas class="blue_border"></div> -->
+        <!-- <div #map_canvas class="blue_border full_height"></div> -->
       </div>
-    </ion-item>
-  </ion-list>
+      <div [hidden] = "currentSegment != 'list'" >
+        <ion-item>
+          <ion-label>List</ion-label>
+        </ion-item>
+        <!-- <div *ngIf="sportPoints">
+          <ion-card *ngFor="let sportPoint of filterSportPoints">
+
+            <ion-card-header>
+              <ion-card-title>{{sportPoint.nom}}</ion-card-title>
+              <ion-card-subtitle>{{sportPoint.stheme}}</ion-card-subtitle>
+            </ion-card-header>
+
+            <ion-card-content>
+              <p>Adresse: {{sportPoint.adresse}}</p>
+              <p>Distance: {{sportPointUtils.friendlyDistance(sportPoint.distance)}}</p>
+            </ion-card-content>
+          </ion-card>
+        </div> -->
+      </div>
+    <!-- </div> -->
+
+  </div>
+
 </ion-content>
