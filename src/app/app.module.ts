@@ -13,6 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { Toast } from '@ionic-native/toast/ngx';
+import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -27,7 +28,7 @@ import { Toast } from '@ionic-native/toast/ngx';
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    Geolocation, Toast
+    Geolocation, Toast, NativeStorage
   ],
   bootstrap: [AppComponent]
 })

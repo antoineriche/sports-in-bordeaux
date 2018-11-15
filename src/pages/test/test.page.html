@@ -3,7 +3,7 @@
     <ion-title>
       Sport points
     </ion-title>
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" *ngIf="currentSegment != 'favorite'">
       ({{currentList.length}})
       <ion-spinner *ngIf="load" name="bubbles"></ion-spinner>
       <ion-button ion-button icon-only (click)="toggleFilters()" *ngIf="!load">
@@ -76,7 +76,28 @@
             <img class="img-icon" [src]="sportPoint.icon"/>
             <ion-badge color="primary">{{sportPointUtils.friendlyDistance(sportPoint.distance)}}</ion-badge>
           </div>
-          <ion-icon name="star-outline" slot="end" color="warning" (click)="toggleFavorite()"></ion-icon>
+          <ion-icon [name]="isFavorite(sportPoint.entityid) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
+          <!-- <ion-icon [name]="'star'" slot="end" color="warning" (click)="toggleFavorite()"></ion-icon> -->
+        </ion-item>
+      </ion-card>
+    </div>
+
+    <div [hidden] = "currentSegment != 'favorite'" class="fill-height second-color" scroll="true">
+      <ion-card *ngFor="let sportPoint of favoritePoints">
+        <ion-item lines="none">
+          <ion-label text-wrap>
+            <ion-text color="primary">
+              <h3>{{sportPoint.stheme}}</h3>
+            </ion-text>
+            <ion-text>
+              <h2>{{sportPoint.nom}}</h2>
+              <p>{{sportPoint.adresse}}</p>
+            </ion-text>
+          </ion-label>
+          <div slot="start">
+            <img class="img-icon" [src]="sportPoint.icon"/>
+          </div>
+          <ion-icon [name]="isFavorite(sportPoint.entityid) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
         </ion-item>
       </ion-card>
     </div>

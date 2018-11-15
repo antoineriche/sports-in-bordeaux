@@ -4,6 +4,7 @@ import { ViewChild, ElementRef } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import { OpenBordeauxService } from '../../services/open-bordeaux/open-bordeaux.service';
+import { FavoriteHandlerService } from '../../services/favorite-handler/favorite-handler.service';
 import { SportPoint, SportPointUtils } from '../../interfaces/SportPoint';
 
 declare var google;
@@ -18,17 +19,18 @@ const BORDEAUX_ORIGIN_POSITION = new google.maps.LatLng(44.837789, -0.57918);
 })
 export class TestPage implements OnInit {
 
-  currentSegment: String = 'map';
+  currentSegment: string = 'map';
   showFilters: boolean = false;
   load: boolean = false;
 
-  currentTypeFilter: String = "Tous";
-  sportPointsTypes: String[] = ["Tous"];
+  currentTypeFilter: string = "Tous";
+  sportPointsTypes: string[] = ["Tous"];
   maxDistance: number = DEFAULT_MAX_DISTANCE;
   currentDistanceFilter: number = this.maxDistance;
 
   allSportPoints: SportPoint[] = [];
   currentList: SportPoint[] = [];
+  favoritePoints: SportPoint[] = [];
   currentPoint: SportPoint;
 
   @ViewChild('map_canvas') mapElement: ElementRef;
@@ -42,6 +44,7 @@ export class TestPage implements OnInit {
 
   constructor(
     private openBordeauxService: OpenBordeauxService,
+    private favoriteHandlerService: FavoriteHandlerService,
     private sportPointUtils: SportPointUtils,
     private geolocation: Geolocation) {
   }
@@ -49,6 +52,13 @@ export class TestPage implements OnInit {
   ngOnInit() {
     console.log('ngOnInit TestPage');
     this.getSportPointsFromOpenBordeaux();
+    this.favoriteHandlerService.getFavoriteSportPoints().then(
+      favs => {
+        this.favoritePoints = favs;
+        console.log(favs);
+      },
+      error => console.log(error)
+    );
   }
 
   ngAfterViewInit(){
@@ -188,7 +198,7 @@ export class TestPage implements OnInit {
     console.log('Apply filters >> ' + this.currentList.length);
   }
 
-  addMarker(location: google.maps.LatLng, map: any, icon: String, key: String) {
+  addMarker(location: google.maps.LatLng, map: any, icon: string, key: string) {
     var marker = new google.maps.Marker({
       position: location,
       map: map,
@@ -227,4 +237,20 @@ export class TestPage implements OnInit {
     this.currentPoint = null;
   }
 
+  isFavorite(key: string): boolean {
+    return this.favoritePoints.map(point => point.entityid).includes(key);
+  }
+
+  toggleFavorite(sportPoint: SportPoint){
+
+    this.favoriteHandlerService.toggleFavoriteSportPoint(sportPoint);
+
+    if(this.favoritePoints.map(point => point.entityid).includes(sportPoint.entityid)){
+      console.log('remove from favorite');
+      this.favoritePoints = this.favoritePoints.filter(point => point.entityid != sportPoint.entityid);
+    } else {
+      console.log('add to favorite');
+      this.favoritePoints.push(sportPoint);
+    }
+  }
 }

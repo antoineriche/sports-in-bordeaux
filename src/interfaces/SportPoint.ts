@@ -26,9 +26,8 @@ export class SportPointUtils {
     return res;
   }
 
-  getFilterTypes(sportPoints: SportPoint[]): String[] {
-    let types: String[] = [];
-    // types.push("Tous");
+  getFilterTypes(sportPoints: SportPoint[]): string[] {
+    let types: string[] = [];
     sportPoints.forEach(function(sportPoint) {
       if(!types.includes(sportPoint.stheme)){
         types.push(sportPoint.stheme);
@@ -43,7 +42,7 @@ export class SportPointUtils {
       && json.y_lat && json.stheme;
   }
 
-  friendlyDistance(distance: number): String{
+  friendlyDistance(distance: number): string{
     return (distance / 1000).toFixed(2) + " km";
   }
 
@@ -66,7 +65,7 @@ export class SportPointUtils {
         icon = '';
       break;
     }
-    
+
     return {
       adresse:  json.adresse,
       entityid: json.entityid,
@@ -75,7 +74,7 @@ export class SportPointUtils {
       y_lat:    json.y_lat,
       stheme:   json.stheme,
       distance: null,
-      icon: icon;
+      icon: icon
     };
   }
 }
