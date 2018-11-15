@@ -7,7 +7,9 @@ import { OpenBordeauxService } from '../../services/open-bordeaux/open-bordeaux.
 import { SportPoint, SportPointUtils } from '../../interfaces/SportPoint';
 
 declare var google;
+declare var klokantech;
 const DEFAULT_MAX_DISTANCE = 50000;
+const BORDEAUX_ORIGIN_POSITION = new google.maps.LatLng(44.837789, -0.57918);
 
 @Component({
   selector: 'app-test',
@@ -62,7 +64,10 @@ export class TestPage implements OnInit {
     this.watchPositionListener = this.geolocation.watchPosition().subscribe(
       position => {
         this.userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        this.map.setCenter(this.userPosition);
+
         this.computeDistance();
+        this.applyFilters();
 
         if(this.currentMarker){
           this.currentMarker.setMap(null);
@@ -71,7 +76,7 @@ export class TestPage implements OnInit {
         this.currentMarker = new google.maps.Marker({
           position: this.userPosition,
           map: this.map,
-          icon: 'http://maps.google.com/mapfiles/kml/paddle/blu-circle.png'
+          icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
         });
       },
       err => { console.log(err); }
@@ -91,9 +96,11 @@ export class TestPage implements OnInit {
         mapTypeControl: false,          // (true? show plan/satellite buttons)
         disableDefaultUI: true,         // (true? hide zoom buttons)
         // gestureHandling: 'none',
-        center: new google.maps.LatLng(44.858880, -0.556600),
+        center: BORDEAUX_ORIGIN_POSITION,
         zoomControl: false
     });
+
+//    var geoloccontrol = new klokantech.GeolocationControl(this.map, 14);
   }
 
   segmentChanged(event: any){
@@ -128,26 +135,7 @@ export class TestPage implements OnInit {
 
     for(let sportPoint of this.allSportPoints) {
       var position = new google.maps.LatLng(sportPoint.y_lat, sportPoint.x_long);
-      let icon: String;
-      switch(sportPoint.stheme){
-        case "Piscines et baignades":
-          icon = "../assets/icon/pool.svg"
-        break;
-        case "Nautisme":
-          icon = "../assets/icon/boat.svg"
-        break;
-        case "Equipements sportifs et ludiques":
-          icon = "../assets/icon/gym.svg"
-        break;
-        case "Terrains et salles de sport":
-          icon = "../assets/icon/gym.svg"
-        break;
-        default:
-          icon = '';
-        break;
-      }
-
-      this.addMarker(position, this.map, icon, sportPoint.entityid);
+      this.addMarker(position, this.map, sportPoint.icon, sportPoint.entityid);
     }
     this.computeDistance();
     this.applyFilters();
@@ -168,7 +156,6 @@ export class TestPage implements OnInit {
       var dizaine = distMax - distMax % 10000
       this.maxDistance = ( dizaine + 1 ) * 10000;
       this.currentDistanceFilter = this.currentDistanceFilter > this.maxDistance ? this.maxDistance : this.currentDistanceFilter;
-      this.applyFilters();
     }
     else if (!this.userPosition){ console.log("Can't compute distance: Waiting for user position."); }
     else if (this.allSportPoints.length == 0){ console.log("Can't compute distance: Waiting for sport points."); }
@@ -195,16 +182,13 @@ export class TestPage implements OnInit {
       );
     }
 
-    let keys = this.currentList.map(point => point.entityid);
-    for(let marker of this.markers){
-      marker.setMap(keys.includes(marker.title) ? this.map : null);
-    }
+    this.drawMarkers(this.currentList, this.map);
 
     this.currentList.sort(function(a, b){return a['distance'] - b['distance']});
     console.log('Apply filters >> ' + this.currentList.length);
   }
 
-  addMarker(location, map, icon, key) {
+  addMarker(location: google.maps.LatLng, map: any, icon: String, key: String) {
     var marker = new google.maps.Marker({
       position: location,
       map: map,
@@ -218,6 +202,20 @@ export class TestPage implements OnInit {
     });
 
     this.markers.push(marker);
+  }
+
+  drawMarkers(sportPointList: SportPoint[], map: any){
+    let keys = sportPointList.map(point => point.entityid);
+    for(let marker of this.markers){
+      if(keys.includes(marker.title)){
+        if(!marker.getMap()){
+          marker.setMap(map);
+        }
+      }
+      else {
+        marker.setMap(null);
+      }
+    }
   }
 
   showSportPointDetails(key: string){

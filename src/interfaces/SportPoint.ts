@@ -8,6 +8,7 @@ export class SportPoint {
   y_lat: string;
   stheme: string;
   distance: number;
+  icon: any;
 }
 
 @Injectable({
@@ -47,6 +48,25 @@ export class SportPointUtils {
   }
 
   jsonToSportPoint(json: any): SportPoint {
+    let icon;
+    switch(json.stheme){
+      case "Piscines et baignades":
+        icon = "../assets/icon/pool.svg"
+      break;
+      case "Nautisme":
+        icon = "../assets/icon/boat.svg"
+      break;
+      case "Equipements sportifs et ludiques":
+        icon = "../assets/icon/gym.svg"
+      break;
+      case "Terrains et salles de sport":
+        icon = "../assets/icon/gym.svg"
+      break;
+      default:
+        icon = '';
+      break;
+    }
+    
     return {
       adresse:  json.adresse,
       entityid: json.entityid,
@@ -54,7 +74,8 @@ export class SportPointUtils {
       x_long:   json.x_long,
       y_lat:    json.y_lat,
       stheme:   json.stheme,
-      distance: null
+      distance: null,
+      icon: icon;
     };
   }
 }
