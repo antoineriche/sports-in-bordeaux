@@ -38,9 +38,18 @@ export class OpenBordeauxService {
 
   getSportPoints(): Observable<any> {
     console.log('getSportPoints');
-    var url = "https://jsonplaceholder.typicode.com/todos";
-    url = "http://odata.bordeaux.fr/v1/databordeaux/poisport/?format=json";
+    var url = "http://odata.bordeaux.fr/v1/databordeaux/poisport/?format=json";
     // url = "https://opendata.paris.fr/api/records/1.0/search/?dataset=nombre-de-beneficiaires-pass-paris-seniors-ou-access&facet=arrondissement&facet=exercice";
+
+    url = "https://cors-anywhere.herokuapp.com/"+url;
+    return this.http.get(url).pipe(
+      map(this.extractData), catchError(this.handleError)
+    );
+  }
+
+  getCulturalPoints(): Observable<any> {
+    console.log('getSportPoints');
+    var url = "http://odata.bordeaux.fr/v1/databordeaux/poiculture/?format=json";
 
     url = "https://cors-anywhere.herokuapp.com/"+url;
     return this.http.get(url).pipe(

@@ -4,33 +4,33 @@ import { ViewChild, ElementRef } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import { OpenBordeauxService } from '../../services/open-bordeaux/open-bordeaux.service';
-import { FavoriteHandlerService } from '../../services/favorite-handler/favorite-handler.service';
-import { SportPoint, SportPointUtils } from '../../interfaces/SportPoint';
+import { CulturalPoint, CulturalPointUtils } from '../../interfaces/CulturalPoint';
+
 
 declare var google;
 const DEFAULT_MAX_DISTANCE = 50000;
 const BORDEAUX_ORIGIN_POSITION = new google.maps.LatLng(44.837789, -0.57918);
 
 @Component({
-  selector: 'app-test',
-  templateUrl: './test.page.html',
-  styleUrls: ['./test.page.scss'],
+  selector: 'app-culturalpoint',
+  templateUrl: './culturalpoint.page.html',
+  styleUrls: ['./culturalpoint.page.scss'],
 })
-export class TestPage implements OnInit {
+export class CulturalpointPage implements OnInit {
 
   currentSegment: string = 'map';
   showFilters: boolean = false;
   load: boolean = false;
 
   currentTypeFilter: string = "Tous";
-  sportPointsTypes: string[] = ["Tous"];
+  culturalPointsTypes: string[] = ["Tous"];
   maxDistance: number = DEFAULT_MAX_DISTANCE;
   currentDistanceFilter: number = this.maxDistance;
 
-  allSportPoints: SportPoint[] = [];
-  currentList: SportPoint[] = [];
-  favoritePoints: SportPoint[] = [];
-  currentPoint: SportPoint;
+  allCulturalPoints: CulturalPoint[] = [];
+  currentList: CulturalPoint[] = [];
+  favoritePoints: CulturalPoint[] = [];
+  currentPoint: CulturalPoint;
 
   @ViewChild('map_canvas') mapElement: ElementRef;
   map: any;
@@ -43,25 +43,24 @@ export class TestPage implements OnInit {
 
   constructor(
     private openBordeauxService: OpenBordeauxService,
-    private favoriteHandlerService: FavoriteHandlerService,
-    private sportPointUtils: SportPointUtils,
+    private culturalPointUtils: CulturalPointUtils,
     private geolocation: Geolocation) {
   }
 
   ngOnInit() {
-    console.log('ngOnInit TestPage');
-    this.getSportPointsFromOpenBordeaux();
-    this.favoriteHandlerService.getFavoriteSportPoints().then(
-      favs => {
-        this.favoritePoints = favs;
-        console.log(favs);
-      },
-      error => console.log(error)
-    );
+    console.log('ngOnInit CulturalpointPage');
+    this.getCulturalPointsFromOpenBordeaux();
+    // this.favoriteHandlerService.getFavoriteSportPoints().then(
+    //   favs => {
+    //     this.favoritePoints = favs;
+    //     console.log(favs);
+    //   },
+    //   error => console.log(error)
+    // );
   }
 
   ngAfterViewInit(){
-    console.log('ngAfterViewInit TestPage');
+    console.log('ngAfterViewInit CulturalpointPage');
     this.loadMap();
 
     this.geolocation.getCurrentPosition().then(
@@ -99,33 +98,11 @@ export class TestPage implements OnInit {
     }
   }
 
-  loadMap() {
-    this.map = new google.maps.Map(this.mapElement.nativeElement, {
-        zoom: 14,
-        mapTypeControl: false,          // (true? show plan/satellite buttons)
-        disableDefaultUI: true,         // (true? hide zoom buttons)
-        // gestureHandling: 'none',
-        center: BORDEAUX_ORIGIN_POSITION,
-        zoomControl: false
-    });
-  }
-
-  segmentChanged(event: any){
-    this.currentSegment = event.target.value;
-    this.showFilters = false;
-    this.closeDetails();
-  }
-
-  toggleFilters(){
-    this.showFilters = !this.showFilters;
-    this.closeDetails();
-  }
-
-  getSportPointsFromOpenBordeaux(){
+  getCulturalPointsFromOpenBordeaux(){
     this.load = true;
-    this.openBordeauxService.getSportPoints().subscribe(
+    this.openBordeauxService.getCulturalPoints().subscribe(
       data  => {
-        this.setSportPointList(data);
+        this.setCulturalPointList(data);
         this.load = false;
       },
       error => {
@@ -136,27 +113,28 @@ export class TestPage implements OnInit {
     );
   }
 
-  setSportPointList(data: any){
-    this.allSportPoints = this.sportPointUtils.extractFromJSON(data);
-    this.sportPointsTypes = this.sportPointsTypes.concat(this.sportPointUtils.getFilterTypes(this.allSportPoints));
+  setCulturalPointList(data: any){
+    this.allCulturalPoints = this.culturalPointUtils.extractFromJSON(data);
+    this.culturalPointsTypes = this.culturalPointsTypes.concat(this.culturalPointUtils.getFilterTypes(this.allCulturalPoints));
 
-    for(let sportPoint of this.allSportPoints) {
-      var position = new google.maps.LatLng(sportPoint.y_lat, sportPoint.x_long);
-      this.addMarker(position, this.map, sportPoint.icon, sportPoint.entityid);
+    for(let culturalPoint of this.allCulturalPoints) {
+      var position = new google.maps.LatLng(culturalPoint.y_lat, culturalPoint.x_long);
+      this.addMarker(position, this.map, culturalPoint.icon, culturalPoint.entityid);
     }
+
     this.computeDistance();
     this.applyFilters();
   }
 
   computeDistance(){
-    if(this.userPosition && this.allSportPoints.length){
+    if(this.userPosition && this.allCulturalPoints.length){
       console.log('Compute distance');
       var distMax = 0;
 
-      for(let sportPoint of this.allSportPoints) {
+      for(let point of this.allCulturalPoints) {
         var distance = google.maps.geometry.spherical.computeDistanceBetween(
-          this.userPosition, new google.maps.LatLng(Number(sportPoint.y_lat), Number(sportPoint.x_long)));
-        sportPoint.distance = distance;
+          this.userPosition, new google.maps.LatLng(Number(point.y_lat), Number(point.x_long)));
+        point.distance = distance;
         distMax = distance > distMax ? distance : distMax;
       }
 
@@ -165,7 +143,7 @@ export class TestPage implements OnInit {
       this.currentDistanceFilter = this.currentDistanceFilter > this.maxDistance ? this.maxDistance : this.currentDistanceFilter;
     }
     else if (!this.userPosition){ console.log("Can't compute distance: Waiting for user position."); }
-    else if (this.allSportPoints.length == 0){ console.log("Can't compute distance: Waiting for sport points."); }
+    else if (this.allCulturalPoints.length == 0){ console.log("Can't compute distance: Waiting for cultural points."); }
   }
 
   onTypeChange(event: any){
@@ -180,11 +158,11 @@ export class TestPage implements OnInit {
 
   applyFilters(){
     if("Tous" != this.currentTypeFilter){
-      this.currentList = this.allSportPoints.filter(
+      this.currentList = this.allCulturalPoints.filter(
         point => (point.distance <= this.currentDistanceFilter) && (point.stheme == this.currentTypeFilter)
       );
     } else {
-      this.currentList = this.allSportPoints.filter(
+      this.currentList = this.allCulturalPoints.filter(
         point => point.distance <= this.currentDistanceFilter
       );
     }
@@ -193,6 +171,17 @@ export class TestPage implements OnInit {
 
     this.currentList.sort(function(a, b){return a['distance'] - b['distance']});
     console.log('Apply filters >> ' + this.currentList.length);
+  }
+
+  loadMap() {
+    this.map = new google.maps.Map(this.mapElement.nativeElement, {
+        zoom: 14,
+        mapTypeControl: false,          // (true? show plan/satellite buttons)
+        disableDefaultUI: true,         // (true? hide zoom buttons)
+        // gestureHandling: 'none',
+        center: BORDEAUX_ORIGIN_POSITION,
+        zoomControl: false
+    });
   }
 
   addMarker(location: google.maps.LatLng, map: any, icon: string, key: string) {
@@ -205,14 +194,14 @@ export class TestPage implements OnInit {
 
     let ctxt = this;
     google.maps.event.addListener(marker, 'click', function() {
-        ctxt.showSportPointDetails(key);
+        ctxt.showCulturalPointDetails(key);
     });
 
     this.markers.push(marker);
   }
 
-  drawMarkers(sportPointList: SportPoint[], map: any){
-    let keys = sportPointList.map(point => point.entityid);
+  drawMarkers(culturalPointList: CulturalPoint[], map: any){
+    let keys = culturalPointList.map(point => point.entityid);
     for(let marker of this.markers){
       if(keys.includes(marker.title)){
         if(!marker.getMap()){
@@ -225,8 +214,8 @@ export class TestPage implements OnInit {
     }
   }
 
-  showSportPointDetails(key: string){
-    this.currentPoint = this.allSportPoints.filter(point => point.entityid == key)[0];
+  showCulturalPointDetails(key: string){
+    this.currentPoint = this.allCulturalPoints.filter(point => point.entityid == key)[0];
     this.showFilters = false;
   }
 
@@ -234,20 +223,8 @@ export class TestPage implements OnInit {
     this.currentPoint = null;
   }
 
-  isFavorite(key: string): boolean {
-    return this.favoritePoints.map(point => point.entityid).includes(key);
+  toggleFilters(){
+    this.showFilters = !this.showFilters;
   }
 
-  toggleFavorite(sportPoint: SportPoint){
-
-    this.favoriteHandlerService.toggleFavoriteSportPoint(sportPoint);
-
-    if(this.favoritePoints.map(point => point.entityid).includes(sportPoint.entityid)){
-      console.log('remove from favorite');
-      this.favoritePoints = this.favoritePoints.filter(point => point.entityid != sportPoint.entityid);
-    } else {
-      console.log('add to favorite');
-      this.favoritePoints.push(sportPoint);
-    }
-  }
 }

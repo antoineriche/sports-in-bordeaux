@@ -4,11 +4,11 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      Sport points
+      Cultural points
     </ion-title>
     <ion-buttons slot="end" *ngIf="currentSegment != 'favorite'">
       ({{currentList.length}})
-      <ion-spinner *ngIf="load" name="bubbles" color="warning"></ion-spinner>
+      <ion-spinner *ngIf="load" name="bubbles"></ion-spinner>
       <ion-button ion-button icon-only (click)="toggleFilters()" *ngIf="!load">
         <ion-icon name="funnel"></ion-icon>
       </ion-button>
@@ -21,13 +21,13 @@
     <ion-item color="primary" lines="none">
       <ion-label>Types</ion-label>
       <ion-select [(ngModel)]="currentTypeFilter" placeholder="Tous" (ionChange)="onTypeChange($event)">
-        <ion-select-option *ngFor="let type of sportPointsTypes" [value]="type">
+        <ion-select-option *ngFor="let type of culturalPointsTypes" [value]="type">
           {{type}}
         </ion-select-option>
       </ion-select>
     </ion-item>
     <ion-item color="primary" lines="none">
-      <ion-label position="fixed">{{sportPointUtils.friendlyDistance(currentDistanceFilter)}}</ion-label>
+      <ion-label position="fixed">{{culturalPointUtils.distance(currentDistanceFilter)}}</ion-label>
       <ion-range [(ngModel)]="currentDistanceFilter" color="warning" pin="false" [(ngModel)]="distanceFilter"
         min="0" [max]="maxDistance" (ionChange)="onDistanceChange($event)">
       </ion-range>
@@ -36,7 +36,7 @@
 
 </ion-header>
 
-<ion-content scroll="false" class="has-header">
+<ion-content scroll="false">
 
   <div id="content-container" class="second-color">
 
@@ -53,7 +53,7 @@
         </ion-label>
         <div slot="start">
           <img class="img-icon" [src]="currentPoint.icon"/>
-          <ion-badge color="primary">{{sportPointUtils.friendlyDistance(currentPoint.distance)}}</ion-badge>
+          <ion-badge color="primary">{{culturalPointUtils.distance(currentPoint.distance)}}</ion-badge>
         </div>
         <ion-icon name="close-circle" slot="end" color="danger" (click)="closeDetails()"></ion-icon>
       </ion-item>
@@ -63,48 +63,8 @@
       <div #map_canvas class="fill-height"></div>
     </div>
 
-    <div [hidden] = "currentSegment != 'list'" class="fill-height second-color" scroll="true">
-      <ion-card *ngFor="let sportPoint of currentList">
-        <ion-item lines="none">
-          <ion-label text-wrap>
-            <ion-text color="primary">
-              <h3>{{sportPoint.stheme}}</h3>
-            </ion-text>
-            <ion-text>
-              <h2>{{sportPoint.nom}}</h2>
-              <p>{{sportPoint.adresse}}</p>
-            </ion-text>
-          </ion-label>
-          <div slot="start">
-            <img class="img-icon" [src]="sportPoint.icon"/>
-            <ion-badge color="primary">{{sportPointUtils.friendlyDistance(sportPoint.distance)}}</ion-badge>
-          </div>
-          <ion-icon [name]="isFavorite(sportPoint.entityid) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
-          <!-- <ion-icon [name]="'star'" slot="end" color="warning" (click)="toggleFavorite()"></ion-icon> -->
-        </ion-item>
-      </ion-card>
-    </div>
-
-    <div [hidden] = "currentSegment != 'favorite'" class="fill-height second-color" scroll="true">
-      <ion-card *ngFor="let sportPoint of favoritePoints">
-        <ion-item lines="none">
-          <ion-label text-wrap>
-            <ion-text color="primary">
-              <h3>{{sportPoint.stheme}}</h3>
-            </ion-text>
-            <ion-text>
-              <h2>{{sportPoint.nom}}</h2>
-              <p>{{sportPoint.adresse}}</p>
-            </ion-text>
-          </ion-label>
-          <div slot="start">
-            <img class="img-icon" [src]="sportPoint.icon"/>
-          </div>
-          <ion-icon [name]="isFavorite(sportPoint.entityid) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
-        </ion-item>
-      </ion-card>
-    </div>
   </div>
+
 </ion-content>
 
 <ion-footer>
