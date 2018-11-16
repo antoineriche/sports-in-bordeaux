@@ -61,6 +61,9 @@ export class CityPointUtils {
       case "Terrains et salles de sport":
         icon = "../assets/icon/gym.svg"
       break;
+      case "Piscines et baignades":
+        icon = "../assets/icon/pool.svg"
+      break;
       default:
         icon = '';
       break;
