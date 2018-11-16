@@ -27,7 +27,7 @@
       </ion-select>
     </ion-item>
     <ion-item color="primary" lines="none">
-      <ion-label position="fixed">{{sportPointUtils.friendlyDistance(currentDistanceFilter)}}</ion-label>
+      <ion-label position="fixed">{{cityPointUtils.friendlyDistance(currentDistanceFilter)}}</ion-label>
       <ion-range [(ngModel)]="currentDistanceFilter" color="warning" pin="false" [(ngModel)]="distanceFilter"
         min="0" [max]="maxDistance" (ionChange)="onDistanceChange($event)">
       </ion-range>
@@ -44,16 +44,16 @@
       <ion-item lines="none" *ngIf="currentPoint">
         <ion-label text-wrap>
           <ion-text color="primary">
-            <h3>{{currentPoint.stheme}}</h3>
+            <h3>{{currentPoint.category}}</h3>
           </ion-text>
           <ion-text>
-            <h2>{{currentPoint.nom}}</h2>
-            <p>{{currentPoint.adresse}}</p>
+            <h2>{{currentPoint.name}}</h2>
+            <p>{{currentPoint.address}}</p>
           </ion-text>
         </ion-label>
         <div slot="start">
           <img class="img-icon" [src]="currentPoint.icon"/>
-          <ion-badge color="primary">{{sportPointUtils.friendlyDistance(currentPoint.distance)}}</ion-badge>
+          <ion-badge color="primary">{{cityPointUtils.friendlyDistance(currentPoint.distance)}}</ion-badge>
         </div>
         <ion-icon name="close-circle" slot="end" color="danger" (click)="closeDetails()"></ion-icon>
       </ion-item>
@@ -68,19 +68,18 @@
         <ion-item lines="none">
           <ion-label text-wrap>
             <ion-text color="primary">
-              <h3>{{sportPoint.stheme}}</h3>
+              <h3>{{sportPoint.category}}</h3>
             </ion-text>
             <ion-text>
-              <h2>{{sportPoint.nom}}</h2>
-              <p>{{sportPoint.adresse}}</p>
+              <h2>{{sportPoint.name}}</h2>
+              <p>{{sportPoint.address}}</p>
             </ion-text>
           </ion-label>
           <div slot="start">
             <img class="img-icon" [src]="sportPoint.icon"/>
-            <ion-badge color="primary">{{sportPointUtils.friendlyDistance(sportPoint.distance)}}</ion-badge>
+            <ion-badge color="primary">{{cityPointUtils.friendlyDistance(sportPoint.distance)}}</ion-badge>
           </div>
-          <ion-icon [name]="isFavorite(sportPoint.entityid) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
-          <!-- <ion-icon [name]="'star'" slot="end" color="warning" (click)="toggleFavorite()"></ion-icon> -->
+          <ion-icon [name]="isFavorite(sportPoint.key) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
         </ion-item>
       </ion-card>
     </div>
@@ -90,17 +89,17 @@
         <ion-item lines="none">
           <ion-label text-wrap>
             <ion-text color="primary">
-              <h3>{{sportPoint.stheme}}</h3>
+              <h3>{{sportPoint.category}}</h3>
             </ion-text>
             <ion-text>
-              <h2>{{sportPoint.nom}}</h2>
-              <p>{{sportPoint.adresse}}</p>
+              <h2>{{sportPoint.name}}</h2>
+              <p>{{sportPoint.address}}</p>
             </ion-text>
           </ion-label>
           <div slot="start">
             <img class="img-icon" [src]="sportPoint.icon"/>
           </div>
-          <ion-icon [name]="isFavorite(sportPoint.entityid) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
+          <ion-icon [name]="isFavorite(sportPoint.key) ? 'star' : 'star-outline'" slot="end" color="warning" (click)="toggleFavorite(sportPoint)"></ion-icon>
         </ion-item>
       </ion-card>
     </div>

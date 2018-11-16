@@ -4,7 +4,9 @@ import { ViewChild, ElementRef } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import { OpenBordeauxService } from '../../services/open-bordeaux/open-bordeaux.service';
-import { CulturalPoint, CulturalPointUtils } from '../../interfaces/CulturalPoint';
+import { FavoriteHandlerService } from '../../services/favorite-handler/favorite-handler.service';
+
+import { CityPoint, CityPointUtils } from '../../interfaces/CityPoint';
 
 
 declare var google;
@@ -18,45 +20,46 @@ const BORDEAUX_ORIGIN_POSITION = new google.maps.LatLng(44.837789, -0.57918);
 })
 export class CulturalpointPage implements OnInit {
 
-  currentSegment: string = 'map';
-  showFilters: boolean = false;
-  load: boolean = false;
+  currentSegment:   string  = 'map';
+  showFilters:      boolean = false;
+  load:             boolean = false;
 
-  currentTypeFilter: string = "Tous";
-  culturalPointsTypes: string[] = ["Tous"];
-  maxDistance: number = DEFAULT_MAX_DISTANCE;
-  currentDistanceFilter: number = this.maxDistance;
+  currentTypeFilter:      string    = "Tous";
+  cityPointsTypes:        string[]  = ["Tous"];
+  maxDistance:            number    = DEFAULT_MAX_DISTANCE;
+  currentDistanceFilter:  number    = this.maxDistance;
 
-  allCulturalPoints: CulturalPoint[] = [];
-  currentList: CulturalPoint[] = [];
-  favoritePoints: CulturalPoint[] = [];
-  currentPoint: CulturalPoint;
+  allCityPoints:  CityPoint[]   = [];
+  favoritePoints: CityPoint[]   = [];
+  currentList:    CityPoint[]   = [];
+  currentPoint:   CityPoint;
 
   @ViewChild('map_canvas') mapElement: ElementRef;
   map: any;
-  userPosition: google.maps.LatLng;
-  currentMarker: google.maps.Marker;
-  markers: any[] = [];
+  userPosition:   google.maps.LatLng;
+  currentMarker:  google.maps.Marker;
+  markers:        any[] = [];
 
   watchPositionListener: any;
   error: any;
 
   constructor(
     private openBordeauxService: OpenBordeauxService,
-    private culturalPointUtils: CulturalPointUtils,
+    private favoriteHandlerService: FavoriteHandlerService,
+    private cityPointUtils: CityPointUtils,
     private geolocation: Geolocation) {
   }
 
   ngOnInit() {
     console.log('ngOnInit CulturalpointPage');
     this.getCulturalPointsFromOpenBordeaux();
-    // this.favoriteHandlerService.getFavoriteSportPoints().then(
-    //   favs => {
-    //     this.favoritePoints = favs;
-    //     console.log(favs);
-    //   },
-    //   error => console.log(error)
-    // );
+    this.favoriteHandlerService.getFavoriteCulturalPoints().then(
+      favs => {
+        this.favoritePoints = favs;
+        console.log(favs);
+      },
+      error => console.log(error)
+    );
   }
 
   ngAfterViewInit(){
@@ -92,7 +95,7 @@ export class CulturalpointPage implements OnInit {
   }
 
   ngOnDestroy() {
-    console.log('ngOnDestroy TestPage');
+    console.log('ngOnDestroy CulturalpointPage');
     if (this.watchPositionListener) {
       this.watchPositionListener.unsubscribe();
     }
@@ -114,12 +117,12 @@ export class CulturalpointPage implements OnInit {
   }
 
   setCulturalPointList(data: any){
-    this.allCulturalPoints = this.culturalPointUtils.extractFromJSON(data);
-    this.culturalPointsTypes = this.culturalPointsTypes.concat(this.culturalPointUtils.getFilterTypes(this.allCulturalPoints));
+    this.allCityPoints = this.cityPointUtils.extractFromJSON(data);
+    this.cityPointsTypes = this.cityPointsTypes.concat(this.cityPointUtils.getCategories(this.allCityPoints));
 
-    for(let culturalPoint of this.allCulturalPoints) {
-      var position = new google.maps.LatLng(culturalPoint.y_lat, culturalPoint.x_long);
-      this.addMarker(position, this.map, culturalPoint.icon, culturalPoint.entityid);
+    for(let culturalPoint of this.allCityPoints) {
+      var position = new google.maps.LatLng(culturalPoint.latitude, culturalPoint.longitude);
+      this.addMarker(position, this.map, culturalPoint.icon, culturalPoint.key);
     }
 
     this.computeDistance();
@@ -127,13 +130,13 @@ export class CulturalpointPage implements OnInit {
   }
 
   computeDistance(){
-    if(this.userPosition && this.allCulturalPoints.length){
+    if(this.userPosition && this.allCityPoints.length){
       console.log('Compute distance');
       var distMax = 0;
 
-      for(let point of this.allCulturalPoints) {
+      for(let point of this.allCityPoints) {
         var distance = google.maps.geometry.spherical.computeDistanceBetween(
-          this.userPosition, new google.maps.LatLng(Number(point.y_lat), Number(point.x_long)));
+          this.userPosition, new google.maps.LatLng(point.latitude, point.longitude));
         point.distance = distance;
         distMax = distance > distMax ? distance : distMax;
       }
@@ -143,7 +146,7 @@ export class CulturalpointPage implements OnInit {
       this.currentDistanceFilter = this.currentDistanceFilter > this.maxDistance ? this.maxDistance : this.currentDistanceFilter;
     }
     else if (!this.userPosition){ console.log("Can't compute distance: Waiting for user position."); }
-    else if (this.allCulturalPoints.length == 0){ console.log("Can't compute distance: Waiting for cultural points."); }
+    else if (this.allCityPoints.length == 0){ console.log("Can't compute distance: Waiting for cultural points."); }
   }
 
   onTypeChange(event: any){
@@ -158,11 +161,11 @@ export class CulturalpointPage implements OnInit {
 
   applyFilters(){
     if("Tous" != this.currentTypeFilter){
-      this.currentList = this.allCulturalPoints.filter(
-        point => (point.distance <= this.currentDistanceFilter) && (point.stheme == this.currentTypeFilter)
+      this.currentList = this.allCityPoints.filter(
+        point => (point.distance <= this.currentDistanceFilter) && (point.category == this.currentTypeFilter)
       );
     } else {
-      this.currentList = this.allCulturalPoints.filter(
+      this.currentList = this.allCityPoints.filter(
         point => point.distance <= this.currentDistanceFilter
       );
     }
@@ -200,8 +203,8 @@ export class CulturalpointPage implements OnInit {
     this.markers.push(marker);
   }
 
-  drawMarkers(culturalPointList: CulturalPoint[], map: any){
-    let keys = culturalPointList.map(point => point.entityid);
+  drawMarkers(culturalPointList: CityPoint[], map: any){
+    let keys = culturalPointList.map(point => point.key);
     for(let marker of this.markers){
       if(keys.includes(marker.title)){
         if(!marker.getMap()){
@@ -214,8 +217,14 @@ export class CulturalpointPage implements OnInit {
     }
   }
 
+  segmentChanged(event: any){
+    this.currentSegment = event.target.value;
+    this.showFilters = false;
+    this.closeDetails();
+  }
+
   showCulturalPointDetails(key: string){
-    this.currentPoint = this.allCulturalPoints.filter(point => point.entityid == key)[0];
+    this.currentPoint = this.allCityPoints.filter(point => point.key == key)[0];
     this.showFilters = false;
   }
 
@@ -225,6 +234,23 @@ export class CulturalpointPage implements OnInit {
 
   toggleFilters(){
     this.showFilters = !this.showFilters;
+  }
+
+  isFavorite(key: string): boolean {
+    return this.favoritePoints.map(point => point.key).includes(key);
+  }
+
+  toggleFavorite(culturalPoint: CityPoint){
+
+    this.favoriteHandlerService.toggleFavoriteCulturalPoint(culturalPoint);
+
+    if(this.favoritePoints.map(point => point.key).includes(culturalPoint.key)){
+      console.log('remove from favorite');
+      this.favoritePoints = this.favoritePoints.filter(point => point.key != culturalPoint.key);
+    } else {
+      console.log('add to favorite');
+      this.favoritePoints.push(culturalPoint);
+    }
   }
 
 }

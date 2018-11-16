@@ -5,7 +5,9 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import { OpenBordeauxService } from '../../services/open-bordeaux/open-bordeaux.service';
 import { FavoriteHandlerService } from '../../services/favorite-handler/favorite-handler.service';
-import { SportPoint, SportPointUtils } from '../../interfaces/SportPoint';
+
+import { CityPoint, CityPointUtils } from '../../interfaces/CityPoint';
+
 
 declare var google;
 const DEFAULT_MAX_DISTANCE = 50000;
@@ -27,10 +29,10 @@ export class TestPage implements OnInit {
   maxDistance: number = DEFAULT_MAX_DISTANCE;
   currentDistanceFilter: number = this.maxDistance;
 
-  allSportPoints: SportPoint[] = [];
-  currentList: SportPoint[] = [];
-  favoritePoints: SportPoint[] = [];
-  currentPoint: SportPoint;
+  allSportPoints: CityPoint[] = [];
+  currentList: CityPoint[] = [];
+  favoritePoints: CityPoint[] = [];
+  currentPoint: CityPoint;
 
   @ViewChild('map_canvas') mapElement: ElementRef;
   map: any;
@@ -44,7 +46,7 @@ export class TestPage implements OnInit {
   constructor(
     private openBordeauxService: OpenBordeauxService,
     private favoriteHandlerService: FavoriteHandlerService,
-    private sportPointUtils: SportPointUtils,
+    private cityPointUtils: CityPointUtils,
     private geolocation: Geolocation) {
   }
 
@@ -137,12 +139,12 @@ export class TestPage implements OnInit {
   }
 
   setSportPointList(data: any){
-    this.allSportPoints = this.sportPointUtils.extractFromJSON(data);
-    this.sportPointsTypes = this.sportPointsTypes.concat(this.sportPointUtils.getFilterTypes(this.allSportPoints));
+    this.allSportPoints = this.cityPointUtils.extractFromJSON(data);
+    this.sportPointsTypes = this.sportPointsTypes.concat(this.cityPointUtils.getCategories(this.allSportPoints));
 
     for(let sportPoint of this.allSportPoints) {
-      var position = new google.maps.LatLng(sportPoint.y_lat, sportPoint.x_long);
-      this.addMarker(position, this.map, sportPoint.icon, sportPoint.entityid);
+      var position = new google.maps.LatLng(sportPoint.latitude, sportPoint.longitude);
+      this.addMarker(position, this.map, sportPoint.icon, sportPoint.key);
     }
     this.computeDistance();
     this.applyFilters();
@@ -155,7 +157,7 @@ export class TestPage implements OnInit {
 
       for(let sportPoint of this.allSportPoints) {
         var distance = google.maps.geometry.spherical.computeDistanceBetween(
-          this.userPosition, new google.maps.LatLng(Number(sportPoint.y_lat), Number(sportPoint.x_long)));
+          this.userPosition, new google.maps.LatLng(sportPoint.latitude, sportPoint.longitude));
         sportPoint.distance = distance;
         distMax = distance > distMax ? distance : distMax;
       }
@@ -181,7 +183,7 @@ export class TestPage implements OnInit {
   applyFilters(){
     if("Tous" != this.currentTypeFilter){
       this.currentList = this.allSportPoints.filter(
-        point => (point.distance <= this.currentDistanceFilter) && (point.stheme == this.currentTypeFilter)
+        point => (point.distance <= this.currentDistanceFilter) && (point.category == this.currentTypeFilter)
       );
     } else {
       this.currentList = this.allSportPoints.filter(
@@ -211,8 +213,8 @@ export class TestPage implements OnInit {
     this.markers.push(marker);
   }
 
-  drawMarkers(sportPointList: SportPoint[], map: any){
-    let keys = sportPointList.map(point => point.entityid);
+  drawMarkers(sportPointList: CityPoint[], map: any){
+    let keys = sportPointList.map(point => point.key);
     for(let marker of this.markers){
       if(keys.includes(marker.title)){
         if(!marker.getMap()){
@@ -226,7 +228,7 @@ export class TestPage implements OnInit {
   }
 
   showSportPointDetails(key: string){
-    this.currentPoint = this.allSportPoints.filter(point => point.entityid == key)[0];
+    this.currentPoint = this.allSportPoints.filter(point => point.key == key)[0];
     this.showFilters = false;
   }
 
@@ -235,16 +237,16 @@ export class TestPage implements OnInit {
   }
 
   isFavorite(key: string): boolean {
-    return this.favoritePoints.map(point => point.entityid).includes(key);
+    return this.favoritePoints.map(point => point.key).includes(key);
   }
 
-  toggleFavorite(sportPoint: SportPoint){
+  toggleFavorite(sportPoint: CityPoint){
 
     this.favoriteHandlerService.toggleFavoriteSportPoint(sportPoint);
 
-    if(this.favoritePoints.map(point => point.entityid).includes(sportPoint.entityid)){
+    if(this.favoritePoints.map(point => point.key).includes(sportPoint.key)){
       console.log('remove from favorite');
-      this.favoritePoints = this.favoritePoints.filter(point => point.entityid != sportPoint.entityid);
+      this.favoritePoints = this.favoritePoints.filter(point => point.key != sportPoint.key);
     } else {
       console.log('add to favorite');
       this.favoritePoints.push(sportPoint);
